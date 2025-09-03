@@ -235,6 +235,13 @@ git push -u origin HEAD
 
 ---
 
+## 🔗 Links Úteis
+
+- **Setup completo (Docker e local):** [SETUP.md](./SETUP.md)
+- **Guia de criação do ambiente:** [GUIA_DE_CRIACAO_DO_AMBIENTE.md](./GUIA_DE_CRIACAO_DO_AMBIENTE.md)
+
+---
+
 ## 📝 Licença
 
 MIT. Use à vontade em estudos, entrevistas e POCs.
