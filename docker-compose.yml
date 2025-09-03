@@ -27,9 +27,12 @@ services:
       - ASPNETCORE_URLS=http://+:8080
       # Importante: usa o nome do serviço 'sql' como host
       - ConnectionStrings__DefaultConnection=Server=sql,1433;Database=CourseEnroll;User Id=sa;Password=${SA_PASSWORD:-Pass@w0rd!};TrustServerCertificate=True;Encrypt=False
+    volumes:
+      - web_keys:/root/.aspnet/DataProtection-Keys
     depends_on:
       sql:
         condition: service_healthy
 
 volumes:
   mssql_data:
+  web_keys:
