@@ -22,14 +22,24 @@
         <MudTh style="width:80px">ID</MudTh>
         <MudTh>Nome</MudTh>
         <MudTh>E-mail</MudTh>
-        <MudTh style="width:160px">Curso</MudTh>
-        <MudTh style="width:200px">Criado em</MudTh>
+        <MudTh style="width:140px">Curso</MudTh>
+        <MudTh style="width:120px">Gênero</MudTh>
+        <MudTh style="width:140px">Titulação</MudTh>
+        <MudTh style="width:140px">Telefone</MudTh>
+        <MudTh style="width:140px">CPF</MudTh>
+        <MudTh style="width:220px">Orgão/Instituição</MudTh>
+        <MudTh style="width:180px">Criado em</MudTh>
       </HeaderContent>
       <RowTemplate>
         <MudTd DataLabel="ID">@context.Id</MudTd>
         <MudTd DataLabel="Nome">@context.FullName</MudTd>
         <MudTd DataLabel="E-mail">@context.Email</MudTd>
         <MudTd DataLabel="Curso">@((string.IsNullOrWhiteSpace(context.Course) ? "-" : context.Course))</MudTd>
+        <MudTd DataLabel="Gênero">@context.Gender</MudTd>
+        <MudTd DataLabel="Titulação">@((context.Degree?.Name) ?? "-")</MudTd>
+        <MudTd DataLabel="Telefone">@FormatPhone(context.MobilePhone)</MudTd>
+        <MudTd DataLabel="CPF">@FormatCpf(context.Cpf)</MudTd>
+        <MudTd DataLabel="Orgão/Instituição">@context.Organization</MudTd>
         <MudTd DataLabel="Criado em">@context.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</MudTd>
       </RowTemplate>
     </MudTable>
@@ -42,8 +52,27 @@
   protected override async Task OnInitializedAsync()
   {
     _items = await Db.Enrollments
+      .Include(e => e.Degree)
       .OrderByDescending(e => e.Id)
       .Take(20)
       .ToListAsync();
+  }
+
+  static string FormatPhone(string? digits)
+  {
+    if (string.IsNullOrWhiteSpace(digits)) return "-";
+    var d = new string(digits.Where(char.IsDigit).ToArray());
+    if (d.Length == 11)
+      return $"({d[..2]}) {d.Substring(2,5)}-{d.Substring(7,4)}";
+    return digits;
+  }
+
+  static string FormatCpf(string? digits)
+  {
+    if (string.IsNullOrWhiteSpace(digits)) return "-";
+    var d = new string(digits.Where(char.IsDigit).ToArray());
+    if (d.Length == 11)
+      return $"{d[..3]}.{d.Substring(3,3)}.{d.Substring(6,3)}-{d.Substring(9,2)}";
+    return digits;
   }
 }
