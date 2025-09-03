@@ -1,0 +1,43 @@
+@page "/users"
+@rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using MudBlazor
+@inject UserManager<IdentityUser> UserManager
+
+<MudPaper Class="p-6">
+  <MudText Typo="Typo.h4" Class="mb-4">Usuários (até 50)</MudText>
+
+  @if (_items?.Count == 0)
+  {
+    <MudAlert Severity="Severity.Info">Nenhum usuário encontrado.</MudAlert>
+  }
+  else
+  {
+    <MudText Typo="Typo.body2" Class="mb-2">Total exibido: @(_items?.Count ?? 0)</MudText>
+
+    <MudTable Items="_items" Dense="true" Hover="true">
+      <HeaderContent>
+        <MudTh style="width:220px">UserName</MudTh>
+        <MudTh style="width:260px">E-mail</MudTh>
+      </HeaderContent>
+      <RowTemplate>
+        <MudTd DataLabel="UserName">@context.UserName</MudTd>
+        <MudTd DataLabel="E-mail">@context.Email</MudTd>
+      </RowTemplate>
+    </MudTable>
+  }
+</MudPaper>
+
+@code {
+  List<IdentityUser> _items = new();
+
+  protected override async Task OnInitializedAsync()
+  {
+    _items = await UserManager.Users
+      .OrderBy(u => u.UserName)
+      .Take(50)
+      .ToListAsync();
+  }
+}
