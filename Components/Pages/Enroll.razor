@@ -2,26 +2,46 @@
 @rendermode InteractiveServer
 @using WebApp.Data
 @using MudBlazor
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
 @inject AppDbContext Db
+@inject ISnackbar Snackbar
 
 <MudPaper Class="p-6 max-w-xl">
   <MudText Typo="Typo.h4" Class="mb-4">Inscrição</MudText>
 
-  <MudForm Model="_model" @ref="_form" onvalidsubmit="Salvar">
-    <MudTextField @bind-Value="_model.FullName" For="() => _model.FullName"
-                  Label="Nome completo" Required="true" />
+  <!-- EditForm é o ÚNICO form. DataAnnotationsValidator usa o EditContext dele -->
+  <EditForm EditContext="_editContext" OnValidSubmit="Salvar">
+    <DataAnnotationsValidator />
 
-    <MudTextField @bind-Value="_model.Email" For="() => _model.Email"
-                  Label="E-mail" Required="true" />
+    <MudTextField @bind-Value="_vm.FullName"
+                  For="@(() => _vm.FullName)"
+                  Label="Nome completo"
+                  Required="true"
+                  RequiredError="Informe seu nome completo"
+                  Immediate="true" />
 
-    <MudSelect T="string" @bind-Value="_model.Course" Label="Curso (opcional)">
+    <MudTextField @bind-Value="_vm.Email"
+                  For="@(() => _vm.Email)"
+                  Label="E-mail"
+                  Required="true"
+                  RequiredError="Informe um e-mail válido"
+                  Immediate="true" />
+
+    <MudSelect T="string" @bind-Value="_vm.Course" Label="Curso (opcional)" Clearable="true">
       <MudSelectItem Value="@("ASP.NET")">ASP.NET</MudSelectItem>
       <MudSelectItem Value="@("Blazor")">Blazor</MudSelectItem>
       <MudSelectItem Value="@("SQL Server")">SQL Server</MudSelectItem>
     </MudSelect>
 
-    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Class="mt-4">Enviar</MudButton>
-  </MudForm>
+    <MudButton ButtonType="ButtonType.Submit"
+               Variant="Variant.Filled"
+               Class="mt-4"
+               Disabled="_saving"
+               Loading="_saving">
+      Enviar
+    </MudButton>
+  </EditForm>
 
   @if (!string.IsNullOrEmpty(_msg))
   {
@@ -30,17 +50,67 @@
 </MudPaper>
 
 @code {
-  Enrollment _model = new();
-  MudForm? _form;
+  // ViewModel da tela
+  public class EnrollmentInput
+  {
+    [Required(ErrorMessage = "Informe seu nome completo")]
+    [StringLength(120, ErrorMessage = "Use no máximo {1} caracteres")]
+    public string? FullName { get; set; }
+
+    [Required(ErrorMessage = "Informe um e-mail válido")]
+    [EmailAddress(ErrorMessage = "E-mail em formato inválido")]
+    [StringLength(160, ErrorMessage = "Use no máximo {1} caracteres")]
+    public string? Email { get; set; }
+
+    [StringLength(80, ErrorMessage = "Use no máximo {1} caracteres")]
+    public string? Course { get; set; }
+  }
+
+  EnrollmentInput _vm = new();
+  EditContext _editContext = default!;
+  bool _saving;
   string? _msg;
+
+  protected override void OnInitialized()
+  {
+    _vm = new EnrollmentInput();
+    _editContext = new EditContext(_vm);
+  }
 
   async Task Salvar()
   {
-    Db.Enrollments.Add(_model);
-    await Db.SaveChangesAsync();
-    _msg = $"Inscrição #{_model.Id} criada.";
-    _model = new();
-    _form?.ResetValidation();
-    StateHasChanged();
+    if (_saving) return;
+    _saving = true;
+    _msg = null;
+
+    try
+    {
+      var entity = new Enrollment
+      {
+        FullName = _vm.FullName!,
+        Email = _vm.Email!,
+        Course = string.IsNullOrWhiteSpace(_vm.Course) ? null : _vm.Course,
+        CreatedAt = DateTime.UtcNow
+      };
+
+      Db.Enrollments.Add(entity);
+      await Db.SaveChangesAsync();
+
+      _msg = $"Inscrição #{entity.Id} criada.";
+      Snackbar.Add(_msg, Severity.Success);
+
+      // Reset do form: novo VM + novo EditContext (limpa campos e validações)
+      _vm = new EnrollmentInput();
+      _editContext = new EditContext(_vm);
+    }
+    catch
+    {
+      Snackbar.Add("Falha ao salvar a inscrição. Tente novamente.", Severity.Error);
+    }
+    finally
+    {
+      _saving = false;
+      StateHasChanged();
+    }
   }
 }
