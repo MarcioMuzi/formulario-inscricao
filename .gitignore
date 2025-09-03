@@ -1,0 +1,29 @@
+# Build output
+bin/
+obj/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# Arquivos de usuário
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# SO
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Caches / ferramentas
+_ReSharper.Caches/
+
+# Configs locais (mantenha appsettings.json versionado)
+appsettings.Development.json
+appsettings.*.local.json
