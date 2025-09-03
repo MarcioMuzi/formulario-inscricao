@@ -1,0 +1,46 @@
+@page "/enroll"
+@rendermode InteractiveServer
+@using WebApp.Data
+@using MudBlazor
+@inject AppDbContext Db
+
+<MudPaper Class="p-6 max-w-xl">
+  <MudText Typo="Typo.h4" Class="mb-4">Inscrição</MudText>
+
+  <MudForm Model="_model" @ref="_form" onvalidsubmit="Salvar">
+    <MudTextField @bind-Value="_model.FullName" For="() => _model.FullName"
+                  Label="Nome completo" Required="true" />
+
+    <MudTextField @bind-Value="_model.Email" For="() => _model.Email"
+                  Label="E-mail" Required="true" />
+
+    <MudSelect T="string" @bind-Value="_model.Course" Label="Curso (opcional)">
+      <MudSelectItem Value="@("ASP.NET")">ASP.NET</MudSelectItem>
+      <MudSelectItem Value="@("Blazor")">Blazor</MudSelectItem>
+      <MudSelectItem Value="@("SQL Server")">SQL Server</MudSelectItem>
+    </MudSelect>
+
+    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Class="mt-4">Enviar</MudButton>
+  </MudForm>
+
+  @if (!string.IsNullOrEmpty(_msg))
+  {
+    <MudAlert Severity="Severity.Success" Class="mt-4">@_msg</MudAlert>
+  }
+</MudPaper>
+
+@code {
+  Enrollment _model = new();
+  MudForm? _form;
+  string? _msg;
+
+  async Task Salvar()
+  {
+    Db.Enrollments.Add(_model);
+    await Db.SaveChangesAsync();
+    _msg = $"Inscrição #{_model.Id} criada.";
+    _model = new();
+    _form?.ResetValidation();
+    StateHasChanged();
+  }
+}

@@ -1,0 +1,25 @@
+@page "/enrollments"
+@rendermode InteractiveServer
+@using WebApp.Data
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext Db
+
+<MudPaper Class="p-6">
+  <MudText Typo="Typo.h4">Inscrições (últimas 20)</MudText>
+  <MudTable Items="_items">
+    <HeaderContent>
+      <MudTh>ID</MudTh>
+      <MudTh>Criado em</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+      <MudTd DataLabel="ID">@context.Id</MudTd>
+      <MudTd DataLabel="Criado">@context.CreatedAt.ToLocalTime()</MudTd>
+    </RowTemplate>
+  </MudTable>
+</MudPaper>
+
+@code {
+  List<Enrollment> _items = new();
+  protected override async Task OnInitializedAsync() =>
+    _items = await Db.Enrollments.OrderByDescending(e => e.Id).Take(20).ToListAsync();
+}
