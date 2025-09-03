@@ -1,0 +1,31 @@
+@page "/logout"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject NavigationManager Nav
+
+<MudPaper Class="p-6">
+  <MudText Typo="Typo.h5">Saindo...</MudText>
+</MudPaper>
+
+@code {
+  private bool _done;
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    // Evita executar durante o pré-render e evita chamadas duplicadas
+    if (firstRender && !_done)
+    {
+      _done = true;
+      try
+      {
+        await SignInManager.SignOutAsync();
+      }
+      catch
+      {
+        // opcional: logar se quiser
+      }
+      Nav.NavigateTo("/Identity/Account/Login", forceLoad: true);
+    }
+  }
+}
