@@ -1,7 +1,7 @@
 # Formulário de Inscrição (.NET 8 + Blazor Server + SQL Server + Identity + Docker)
 
 Projeto de exemplo utilizando **.NET 8**, **Blazor Server (Razor Components)**, **MudBlazor**, **Entity Framework Core 9** (SQL Server) e **ASP.NET Core Identity (cookie)**.  
-Serve como base para um CRUD simples de inscrições, com autenticação, **execução via Docker Compose** e boas práticas mínimas para **entrevistas** e **portfólio**.
+Serve como base para um CRUD simples de inscrições, com autenticação, **execução via Docker Compose** e boas práticas mínimas para **portfólio**.
 
 > **Objetivo didático:** Blazor Server **sem** expor APIs; autenticação por **cookie** (UI do Identity). JWT/OAuth2 pode ser adicionado como etapa posterior.
 
