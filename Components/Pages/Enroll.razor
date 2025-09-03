@@ -4,6 +4,7 @@
 @using MudBlazor
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.EntityFrameworkCore
 @inject AppDbContext Db
 @inject ISnackbar Snackbar
 
@@ -34,6 +35,55 @@
       <MudSelectItem Value="@("SQL Server")">SQL Server</MudSelectItem>
     </MudSelect>
 
+    <MudTextField @bind-Value="_vm.MobilePhone"
+                  For="@(() => _vm.MobilePhone)"
+                  Label="Telefone celular (WhatsApp)"
+                  Required="true"
+                  RequiredError="Informe o telefone"
+                  Mask="@(new PatternMask("(00) 00000-0000"))"
+                  Immediate="true" />
+
+    <MudTextField @bind-Value="_vm.Cpf"
+                  For="@(() => _vm.Cpf)"
+                  Label="CPF"
+                  Required="true"
+                  RequiredError="Informe o CPF"
+                  Mask="@(new PatternMask("000.000.000-00"))"
+                  Immediate="true" />
+
+    <MudSelect T="string"
+               @bind-Value="_vm.Gender"
+               For="@(() => _vm.Gender)"
+               Label="Gênero"
+               Required="true"
+               RequiredError="Selecione o gênero">
+      <MudSelectItem Value="@("Masculino")">Masculino</MudSelectItem>
+      <MudSelectItem Value="@("Feminino")">Feminino</MudSelectItem>
+      <MudSelectItem Value="@("Outro")">Outro</MudSelectItem>
+    </MudSelect>
+
+    <MudTextField @bind-Value="_vm.Organization"
+                  For="@(() => _vm.Organization)"
+                  Label="Orgão/Instituição"
+                  Required="true"
+                  RequiredError="Informe o órgão/Instituição"
+                  Immediate="true" />
+
+    <MudSelect T="int"
+               @bind-Value="_vm.DegreeId"
+               For="@(() => _vm.DegreeId)"
+               Label="Titulação"
+               Required="true"
+               RequiredError="Selecione a titulação">
+      @if (_degrees is not null)
+      {
+        @foreach (var d in _degrees)
+        {
+          <MudSelectItem Value="@d.Id">@d.Name</MudSelectItem>
+        }
+      }
+    </MudSelect>
+
     <MudButton ButtonType="ButtonType.Submit"
                Variant="Variant.Filled"
                Class="mt-4"
@@ -50,32 +100,55 @@
 </MudPaper>
 
 @code {
-  // ViewModel da tela
+  // ViewModel da tela (validações alinhadas ao modelo)
   public class EnrollmentInput
   {
     [Required(ErrorMessage = "Informe seu nome completo")]
-    [StringLength(120, ErrorMessage = "Use no máximo {1} caracteres")]
+    [StringLength(200, ErrorMessage = "Use no máximo {1} caracteres")]
     public string? FullName { get; set; }
 
     [Required(ErrorMessage = "Informe um e-mail válido")]
     [EmailAddress(ErrorMessage = "E-mail em formato inválido")]
-    [StringLength(160, ErrorMessage = "Use no máximo {1} caracteres")]
+    [StringLength(256, ErrorMessage = "Use no máximo {1} caracteres")]
     public string? Email { get; set; }
 
-    [StringLength(80, ErrorMessage = "Use no máximo {1} caracteres")]
+    [StringLength(100, ErrorMessage = "Use no máximo {1} caracteres")]
     public string? Course { get; set; }
+
+    [Required(ErrorMessage = "Informe o telefone")]
+    [StringLength(15, MinimumLength = 15, ErrorMessage = "Preencha o telefone completo")]
+    public string? MobilePhone { get; set; }
+
+    [Required(ErrorMessage = "Informe o CPF")]
+    [StringLength(14, MinimumLength = 14, ErrorMessage = "Preencha o CPF completo")]
+    public string? Cpf { get; set; }
+
+    [Required(ErrorMessage = "Selecione o gênero")]
+    [RegularExpression("^(Masculino|Feminino|Outro)$", ErrorMessage = "Selecione uma opção válida")]
+    public string? Gender { get; set; }
+
+    [Required(ErrorMessage = "Informe o órgão/Instituição")]
+    [StringLength(200, ErrorMessage = "Use no máximo {1} caracteres")]
+    public string? Organization { get; set; }
+
+    [Range(1, int.MaxValue, ErrorMessage = "Selecione a titulação")]
+    public int DegreeId { get; set; }
   }
 
   EnrollmentInput _vm = new();
   EditContext _editContext = default!;
   bool _saving;
   string? _msg;
+  List<Degree> _degrees = new();
 
-  protected override void OnInitialized()
+  protected override async Task OnInitializedAsync()
   {
     _vm = new EnrollmentInput();
     _editContext = new EditContext(_vm);
+    _degrees = await Db.Degrees.OrderBy(d => d.Id).ToListAsync();
   }
+
+  static string OnlyDigits(string value) => new(value.Where(char.IsDigit).ToArray());
 
   async Task Salvar()
   {
@@ -85,12 +158,32 @@
 
     try
     {
+      // Sanitização para gravar só dígitos
+      var phoneDigits = OnlyDigits(_vm.MobilePhone ?? "");
+      var cpfDigits = OnlyDigits(_vm.Cpf ?? "");
+
+      if (phoneDigits.Length != 11)
+      {
+        Snackbar.Add("Telefone inválido. Use 11 dígitos (DDD + número).", Severity.Error);
+        return;
+      }
+      if (cpfDigits.Length != 11)
+      {
+        Snackbar.Add("CPF inválido. Deve conter 11 dígitos.", Severity.Error);
+        return;
+      }
+
       var entity = new Enrollment
       {
-        FullName = _vm.FullName!,
-        Email = _vm.Email!,
-        Course = string.IsNullOrWhiteSpace(_vm.Course) ? null : _vm.Course,
-        CreatedAt = DateTime.UtcNow
+        FullName    = _vm.FullName!,
+        Email       = _vm.Email!,
+        Course      = string.IsNullOrWhiteSpace(_vm.Course) ? null : _vm.Course,
+        MobilePhone = phoneDigits,
+        Cpf         = cpfDigits,
+        Gender      = _vm.Gender!,
+        Organization= _vm.Organization!,
+        DegreeId    = _vm.DegreeId,
+        CreatedAt   = DateTime.UtcNow
       };
 
       Db.Enrollments.Add(entity);
