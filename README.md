@@ -1,5 +1,14 @@
 # Formulário de Inscrição (.NET 8 + Blazor Server + SQL Server + Identity + Docker)
 
+[![.NET 8](https://img.shields.io/badge/.NET-8-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![C# 12](https://img.shields.io/badge/CSharp-12-239120?style=for-the-badge&logo=csharp&logoColor=white)](https://learn.microsoft.com/dotnet/csharp/whats-new/csharp-12)
+[![Blazor Server](https://img.shields.io/badge/Blazor-Server-512BD4?style=for-the-badge&logo=blazor&logoColor=white)](https://learn.microsoft.com/aspnet/core/blazor/?view=aspnetcore-8.0)
+[![MudBlazor 8.12.0](https://img.shields.io/badge/MudBlazor-8.12.0-6E59A5?style=for-the-badge)](https://mudblazor.com/)
+[![EF Core 9.0.8](https://img.shields.io/badge/EF%20Core-9.0.8-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://learn.microsoft.com/ef/core/)
+[![ASP.NET Identity](https://img.shields.io/badge/ASP.NET%20Identity-8-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://learn.microsoft.com/aspnet/core/security/authentication/identity)
+[![SQL Server 2022](https://img.shields.io/badge/SQL%20Server-2022-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server/sql-server-2022)
+[![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+
 Projeto de exemplo utilizando **.NET 8**, **Blazor Server (Razor Components)**, **MudBlazor**, **Entity Framework Core 9** (SQL Server) e **ASP.NET Core Identity (cookie)**.  
 Serve como base para um CRUD simples de inscrições, com autenticação, **execução via Docker Compose** e boas práticas mínimas para **portfólio**.
 
